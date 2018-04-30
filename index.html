@@ -1,0 +1,520 @@
+	<html>
+		<head>
+			<title>My first three.js app</title>
+			<style>
+				body { margin: 0; }
+				canvas { width: 100%; height: 100% }
+			</style>
+		</head>
+		<body> 
+			
+			<script src="three.js"></script>
+			<script src="OrbitControls.js"></script>
+		 	<script src="AnaglyphEffect.js"></script>
+			<script src="dat.gui.min.js"></script>
+			<!-- Note the additional JS files! always need all of these for postprocessing. -->
+<script src="postprocessing/EffectComposer.js"></script>
+<script src="postprocessing/RenderPass.js"></script>
+<script src="postprocessing/ShaderPass.js"></script>
+<script src="postprocessing/MaskPass.js"></script>
+
+<!-- separate out the shaders specific to this demo -->
+<script src="VignetteShader.js"></script>
+
+<script src="postprocessing/BloomPass.js"></script>
+<script src="postprocessing/FilmPass.js"></script>
+<script src="postprocessing/DotScreenPass.js"></script>
+<script src="postprocessing/TexturePass.js"></script>
+			<script >
+				//window.onload = function() 
+    
+				(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='stats.js';document.head.appendChild(script);})();
+
+
+				var scene = new THREE.Scene();
+				var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 ); //pc(field of view, aspect ratio, near clipping, far clipping);
+				//Reposition the camera;
+				camera.position.set(0,30,50);
+				//Point the camera at a specified coordinate
+				camera.lookAt(new THREE.Vector3(0,15,0));
+				var renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor(0xffffff);
+				renderer.shadowMap.enabled=true;
+				renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+				document.body.appendChild( renderer.domElement );
+
+				//resize the object with window
+				window.addEventListener('resize',function()
+				{
+					var width= window.innerWidth;
+					var height=window.innerHeight;
+					renderer.setSize(width,height);
+					camera.aspect=width/height;
+					camera.updateProjectionMatrix();
+				});
+				var effect=new THREE.AnaglyphEffect(renderer);
+				effect.setSize(window.innerWidth,window.innerHeight);
+				controls=new THREE.OrbitControls(camera,renderer.domElement);
+
+
+		
+				//create a material/texture
+				var material=new THREE.MeshBasicMaterial({
+						color: 0xFF0040,
+						transparent:true,
+						opacity:1,
+						wireframe:true,
+						wireframeLinewidth:'round',
+						wireframeLinecap: 'round'
+
+				});
+
+
+				camera.position.z = 2;
+	
+
+				var light=new THREE.AmbientLight(0xBDB76B,1);
+				scene.add(light);
+
+				var pointLight = new THREE.PointLight( 0xff0000, 2 );
+				pointLight.position.set( 25, 50, 25 );
+				pointLight.castShadow = true;
+				pointLight.shadow.mapSize.width = 512; //default
+				pointLight.shadow.mapSize.height = 1024;
+				pointLight.shadow.camera.near=0.5;
+				pointLight.shadow.camera.far=500;
+				scene.add( pointLight );
+				
+
+	//skybox...................................................................................................
+
+			var geometry1 = new THREE.BoxGeometry( 200,200,200);
+
+	var cubeMaterials=
+	[
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_ft.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_bk.png'), side:THREE.DoubleSide,shading:THREE.FlatShading}),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_up.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_dn.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_rt.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_lf.png'), side:THREE.DoubleSide,shading:THREE.FlatShading })
+	];
+
+				var material = new THREE.MeshFaceMaterial( cubeMaterials );
+				var cube = new THREE.Mesh( geometry1, cubeMaterials );
+				//geometry1.castShadow=true;
+				//geometry1.receiveShadow=true;
+				scene.add( cube );
+						//camera.position=3;
+		var geo=new THREE.Object3D();	
+		//upcube
+		var cubeUp = new THREE.BoxGeometry(4, 3, 4 );
+	  	var cubeUpMaterial  = new THREE.MeshPhongMaterial({color:'red'} );
+		var cube1 = new THREE.Mesh( cubeUp, cubeUpMaterial );
+		cube1.castShadow = true; //default is false
+		cube1.receiveShadow = true; //default
+		cube1.position.set(0,1,0);
+		cube1.translateY(1);
+	geo.add( cube1 );
+	var cubeDown = new THREE.BoxGeometry( 10, 2, 5 );
+	var cubeDownMaterial1 = new THREE.MeshPhongMaterial( { color: 0x00FFFF } );
+	var cube2 = new THREE.Mesh( cubeDown, cubeDownMaterial1 );
+	cube2.castShadow = true; //default is false
+	cube2.receiveShadow = true; //default
+	geo.add( cube2 );
+	//back right wheel
+	var brWheel = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var wheelmaterial= new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load('Img/tire.jpg'), side:THREE.DoubleSide});
+	var brtire = new THREE.Mesh( brWheel, wheelmaterial);
+	brtire.position.set(2,-1,-2.5);
+	geo.add( brtire );
+	//back left wheel
+	var blWheel = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var bltire = new THREE.Mesh( blWheel, wheelmaterial );
+	bltire.position.set(-2,-1,-2.5);
+	geo.add( bltire );
+	//front left
+	var flWheel = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var fltire = new THREE.Mesh( flWheel, wheelmaterial );
+	fltire.position.set(-2,-1,2.6);
+	geo.add( fltire );
+	//front right
+	var frWheel = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var frtire = new THREE.Mesh( frWheel, wheelmaterial );
+	frtire.position.set(2,-1,2.6);
+	geo.add( frtire );
+
+	scene.add(geo);
+	
+	var gui = new dat.GUI();
+
+	//CONTROL MENU
+	
+	var cameraGui = gui.addFolder("camera position");
+	cameraGui.add(camera.position, 'x');
+	cameraGui.add(camera.position, 'y');
+	cameraGui.add(camera.position, 'z');
+	//cameraGui.open();
+
+	var cameraGui = gui.addFolder("camera projection");
+	cameraGui.add(camera, "fov");
+	//cameraGui.open();
+
+	var lightGui = gui.addFolder("Ambient light position");
+	lightGui.add(light.position, 'x');
+	lightGui.add(light.position, 'y');
+	lightGui.add(light.position, 'z');
+	//lightGui.open();
+
+	var light1Gui = gui.addFolder("Point light position");
+	light1Gui.add(pointLight.position, 'x');
+	light1Gui.add(pointLight.position, 'y');
+	light1Gui.add(pointLight.position, 'z');
+	//light1Gui.open();
+	
+	var parameter = 
+	{
+	x: 0, y: 30, z: 0,
+	rx1:0.00,ry1:0.00,rz1:0.00,
+	tx1:-40,ty1:-50,tz1:-90,
+	vignetteOffset: 1.5, vignetteDarkness: 1.6,
+	color:  "#ff0000", // color (change "#" to "0x")
+	colorA: "#000000", // color (change "#" to "0x")
+	uheightCar:3,
+	uwidthCar:4,
+	udepthCar:4,
+	translateCarHeight:1,
+	translateCarWidth:0,
+	translateCarDepth:0,
+	translateCarHeightl:0,
+	translateCarWidthl:0,
+	translateCarDepthl:0,
+	lwidthCar:10,
+	lheightCar:2,
+	ldepthCar:5,
+	//radius:
+	material: "Phong",
+	useShaderVignette:  function() { setupShaderVignette();  },
+	useShaderNone:      function() { setupShaderNone();      },
+	reset: function() { resetSphere() }
+	};
+	setupShaderNone();
+	
+		
+var shaderActive = "none";
+
+function setupShaderNone()
+{
+	shaderActive = "none";
+}
+
+
+	var design=gui.addFolder('Car Design');
+	var UB=design.addFolder('Upper Body');
+	var LB=design.addFolder('Lower Body');
+	//COLOR Change
+	var sphereColor = UB.addColor( parameter, 'color' ).name('Body Color').listen();
+	sphereColor.onChange(function(value) // onFinishChange
+	{   cube1.material.color.setHex( value.replace("#", "0x") );   });
+
+	var sphereColor = LB.addColor( parameter, 'colorA' ).name('Lower Body Color').listen();
+	sphereColor.onChange(function(value) // onFinishChange
+	{   cube2.material.color.setHex( value.replace("#", "0x") );   });
+
+	//Designing Upper  body
+	var upperheight=UB.add(parameter,'uheightCar').name('Height').min(3).max(10).step(1).listen();
+	upperheight.onChange(function(value) // onFinishChange
+	{ cube1.scale.y = parameter.uheightCar; 	 });
+	var upperwidth=UB.add(parameter,'uwidthCar').name('Width').min(4).max(10).step(1).listen();
+	upperwidth.onChange(function(value) // onFinishChange
+	{ cube1.scale.x = parameter.uwidthCar; 	 });
+	var upperdepth=UB.add(parameter,'udepthCar').name('Depth').min(4).max(10).step(1).listen();
+	upperdepth.onChange(function(value) // onFinishChange
+	{ cube1.scale.z = parameter.udepthCar; 	 });
+
+	//Upper translation
+	var upperTranslatey=UB.add(parameter,'translateCarWidth').name('Translate X').min(-10).max(10).step(0.1).listen();
+	upperTranslatey.onChange(function(value)
+		{cube1.translateX(parameter.translateCarWidth)});
+	var upperTranslatex=UB.add(parameter,'translateCarHeight').name('Translate Y').min(-10).max(10).step(0.1).listen();
+	upperTranslatex.onChange(function(value)
+		{cube1.translateY(parameter.translateCarHeight)});
+	var upperTranslatez=UB.add(parameter,'translateCarDepth').name('Translate Z').min(-10).max(10).step(0.1).listen();
+	upperTranslatez.onChange(function(value)
+		{cube1.translateZ(parameter.translateCarDepth)});
+//designing lower body
+	var lowerwidth=LB.add(parameter,'lwidthCar').name('Width').min(10).max(20).step(1).listen();
+	lowerwidth.onChange(function(value) // onFinishChange
+	{ cube2.scale.x = parameter.lwidthCar; 	 });
+	var lowerheight=LB.add(parameter,'lheightCar').name('Height').min(2).max(10).step(1).listen();
+	lowerheight.onChange(function(value) // onFinishChange
+	{ cube2.scale.y = parameter.lheightCar;});
+	var lowerdepth=LB.add(parameter,'ldepthCar').name('Depth').min(5).max(10).step(1).listen();
+	lowerheight.onChange(function(value) // onFinishChange
+	{ cube2.scale.z = parameter.ldepthtCar;  });
+	//Lower Translation
+	var lowerTranslatey=LB.add(parameter,'translateCarWidthl').name('Translate X').min(-10).max(10).step(0.1).listen();
+	lowerTranslatey.onChange(function(value)
+		{cube2.translateX(parameter.translateCarWidthl)});
+	var lowerTranslatex=LB.add(parameter,'translateCarHeightl').name('Translate Y').min(-10).max(10).step(0.1).listen();
+	lowerTranslatex.onChange(function(value)
+		{cube2.translateY(parameter.translateCarHeightl)});
+	var lowerTranslatez=LB.add(parameter,'translateCarDepthl').name('Translate Z').min(-10).max(10).step(0.1).listen();
+	lowerTranslatez.onChange(function(value)
+		{cube2.translateZ(parameter.translateCarDepthl)});
+
+//Material
+	var cubeUpMaterial = UB.add( parameter, 'material', [ "Basic", "Lambert", "Phong", "Wireframe" ] ).name('Material Type').listen();
+	cubeUpMaterial.onChange(function(value) 
+	{   updateUp();   });
+
+	var cubeDownMaterial = LB.add( parameter, 'material', [ "Basic", "Lambert", "Phong", "Wireframe" ] ).name('Material Type').listen();
+	cubeDownMaterial.onChange(function(value) 
+	{   updateDown();   });
+//Vignette
+	var folderVignette = gui.addFolder('Vignette');
+	var vignetteOffsetGUI = folderVignette.add( parameter, 'vignetteOffset' ).min(0).max(3).step(0.01).name("Offset").listen();
+	vignetteOffsetGUI.onChange(
+		function(value)
+		{   setupShaderVignette();   }
+	);
+	var vignetteDarknessGUI = folderVignette.add( parameter, 'vignetteDarkness' ).min(0).max(3).step(0.01).name("Darkness").listen();
+	vignetteDarknessGUI.onChange(
+		function(value)
+		{   setupShaderVignette();   }
+	);
+	//folderVignette.open();
+//Car position
+	var folder1 = gui.addFolder('Car Position');
+	var sphereX = folder1.add( parameter, 'x' ).min(-200).max(200).step(1).listen();
+	var sphereY = folder1.add( parameter, 'y' ).min(0).max(100).step(1).listen();
+	var sphereZ = folder1.add( parameter, 'z' ).min(-200).max(200).step(1).listen();
+
+	//folder1.open();
+	var folder2 = gui.addFolder('Car Rotation');
+	var roX = folder2.add( parameter, 'rx1' ).min(0).max(2).step(0.001).listen();
+	var roY = folder2.add( parameter, 'ry1' ).min(0).max(2).step(0.001).listen();
+	var roZ = folder2.add( parameter, 'rz1' ).min(0).max(2).step(0.001).listen();
+	//folder2.open();
+
+	var folder3 = gui.addFolder('Car Translation');
+	var traX = folder3.add( parameter, 'tx1' ).min(-20).max(20).step(0.0001).listen();
+	var traY = folder3.add( parameter, 'ty1' ).min(-50).max(-49.90).step(0.0001).listen();
+	var traZ = folder3.add( parameter, 'tz1' ).min(-90).max(-89.99).step(0.0001).listen();
+	gui.add( parameter, 'reset' ).name("Reset");
+
+	function setupShaderVignette()
+{
+	composer = new THREE.EffectComposer( renderer );
+	composer.addPass( new THREE.RenderPass( scene, camera ) );
+	
+	var shaderVignette = THREE.VignetteShader;
+	var effectVignette = new THREE.ShaderPass( shaderVignette );
+	// larger values = darker closer to center
+	// darkness < 1  => lighter edges
+	effectVignette.uniforms[ "offset" ].value = parameter.vignetteOffset;
+	effectVignette.uniforms[ "darkness" ].value = parameter.vignetteDarkness;
+	effectVignette.renderToScreen = true;
+	composer.addPass(effectVignette);
+	shaderActive = "vignette";
+}
+
+	sphereX.onChange(function(value) 
+	{   geo.position.x = value;   });
+	sphereY.onChange(function(value) 
+	{   geo.position.y = value;   });
+	sphereZ.onChange(function(value) 
+	{   geo.position.z = value;   });
+
+	roX.onChange(function(value) 
+	{   geo.rotate.x = value;   });
+	roY.onChange(function(value) 
+	{   geo.rotate.y = value;   });
+	roZ.onChange(function(value) 
+	{   geo.rotate.z = value;   });
+
+	traX.onChange(function(value) 
+	{   geo.translateX(value);   });
+	traY.onChange(function(value) 
+	{   geo.translateY(value);   });
+	traZ.onChange(function(value) 
+	{   geo.translateY(value);   });
+	
+	//Checking the status
+	
+	geo.translateX(-40);
+	geo.translateY(-50);
+	geo.translateZ(-90);
+
+	 function updateUp()
+	{
+	var value = parameter.material;
+	var newMaterial;
+	if (value == "Basic")
+		newMaterial = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+	else if (value == "Lambert")
+		newMaterial = new THREE.MeshLambertMaterial( { color: 0x000000 } );
+	else if (value == "Phong")
+		newMaterial = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+	else // (value == "Wireframe")
+		newMaterial = new THREE.MeshBasicMaterial( { wireframe: true } );
+	cube1.material = newMaterial;
+	}
+
+	 function updateDown()
+	{
+	var value = parameter.material;
+	var newMaterial;
+	if (value == "Basic")
+		newMaterial = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+	else if (value == "Lambert")
+		newMaterial = new THREE.MeshLambertMaterial( { color: 0x000000 } );
+	else if (value == "Phong")
+		newMaterial = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+	else // (value == "Wireframe")
+		newMaterial = new THREE.MeshBasicMaterial( { wireframe: true } );
+	cube2.material = newMaterial;
+}
+
+function resetSphere()
+{
+	parameter.x = 0;
+	parameter.y = 30;
+	parameter.z = 0;
+	parameter.rx1=0.00;
+	parameter.ry1=0.00;
+	parameter.rz1=0.00;
+	parameter.tx1=-40;
+	parameter.ty1=-50;
+	parameter.tz1=-90;
+	parameter.vignetteOffset= 1.5;
+	parameter.vignetteDarkness= 1.6;
+	parameter.color = "#ff0000";
+	parameter.colorA = "#000000";
+	parameter.material = "Phong";
+	parameter.uheightCar=3,
+	parameter.uwidthCar=4,
+	parameter.udepthCar=4,
+	parameter.translateCarHeight=1,
+	parameter.translateCarWidth=0,
+	parameter.translateCarDepth=0,
+	parameter.translateCarHeightl=0,
+	parameter.translateCarWidthl=0,
+	parameter.translateCarDepthl=0,
+	parameter.lwidthCar=10,
+	parameter.lheightCar=2,
+	parameter.ldepthCar=5,
+	setupShaderNone(),
+	reset_everything()
+}
+
+function reset_everything()
+{
+
+	geo.position.x = parameters.x;
+	geo.position.y = parameters.y;
+	geo.position.z = parameters.z;
+	geo.translateX(parameters.tx1);
+	geo.translateY(arameters.ty1);
+	geo.translateZ(parameters.tz1);
+	cube1.material.color.setHex( parameter.color.replace("#", "0x") );
+	if (sphere.material.ambient)
+		sphere.material.ambient.setHex( parameter.colorA.replace("#", "0x") );
+    if (sphere.material.emissive)
+		sphere.material.emissive.setHex( parameter.colorE.replace("#", "0x") ); 
+	var sphereColor = UB.addColor( parameter, 'color' ).name('Body Color').listen();
+	sphereColor.onChange(function(value) // onFinishChange
+	{   cube1.material.color.setHex( value.replace("#", "0x") );   });
+
+	var sphereColor = LB.addColor( parameter, 'colorA' ).name('Lower Body Color').listen();
+	sphereColor.onChange(function(value) // onFinishChange
+	{   cube2.material.color.setHex( value.replace("#", "0x") );   });
+
+	//Designing Upper  body
+	var upperheight=UB.add(parameter,'uheightCar').name('Height').min(3).max(10).step(1).listen();
+	upperheight.onChange(function(value) // onFinishChange
+	{ cube1.scale.y = parameter.uheightCar; 	 });
+	var upperwidth=UB.add(parameter,'uwidthCar').name('Width').min(4).max(10).step(1).listen();
+	upperwidth.onChange(function(value) // onFinishChange
+	{ cube1.scale.x = parameter.uwidthCar; 	 });
+	var upperdepth=UB.add(parameter,'udepthCar').name('Depth').min(4).max(10).step(1).listen();
+	upperdepth.onChange(function(value) // onFinishChange
+	{ cube1.scale.z = parameter.udepthCar; 	 });
+
+	//Upper translation
+	var upperTranslatey=UB.add(parameter,'translateCarWidth').name('Translate X').min(-10).max(10).step(0.1).listen();
+	upperTranslatey.onChange(function(value)
+		{cube1.translateX(parameter.translateCarWidth)});
+	var upperTranslatex=UB.add(parameter,'translateCarHeight').name('Translate Y').min(-10).max(10).step(0.1).listen();
+	upperTranslatex.onChange(function(value)
+		{cube1.translateY(parameter.translateCarHeight)});
+	var upperTranslatez=UB.add(parameter,'translateCarDepth').name('Translate Z').min(-10).max(10).step(0.1).listen();
+	upperTranslatez.onChange(function(value)
+		{cube1.translateZ(parameter.translateCarDepth)});
+//designing lower body
+	var lowerwidth=LB.add(parameter,'lwidthCar').name('Width').min(10).max(20).step(1).listen();
+	lowerwidth.onChange(function(value) // onFinishChange
+	{ cube2.scale.x = parameter.lwidthCar; 	 });
+	var lowerheight=LB.add(parameter,'lheightCar').name('Height').min(2).max(10).step(1).listen();
+	lowerheight.onChange(function(value) // onFinishChange
+	{ cube2.scale.y = parameter.lheightCar;});
+	var lowerdepth=LB.add(parameter,'ldepthCar').name('Depth').min(5).max(10).step(1).listen();
+	lowerheight.onChange(function(value) // onFinishChange
+	{ cube2.scale.z = parameter.ldepthtCar;  });
+	//Lower Translation
+	var lowerTranslatey=LB.add(parameter,'translateCarWidthl').name('Translate X').min(-10).max(10).step(0.1).listen();
+	lowerTranslatey.onChange(function(value)
+		{cube2.translateX(parameter.translateCarWidthl)});
+	var lowerTranslatex=LB.add(parameter,'translateCarHeightl').name('Translate Y').min(-10).max(10).step(0.1).listen();
+	lowerTranslatex.onChange(function(value)
+		{cube2.translateY(parameter.translateCarHeightl)});
+	var lowerTranslatez=LB.add(parameter,'translateCarDepthl').name('Translate Z').min(-10).max(10).step(0.1).listen();
+	lowerTranslatez.onChange(function(value)
+		{cube2.translateZ(parameter.translateCarDepthl)});
+	updateUp();
+	updateDown();
+	
+shaderActive=none;
+animate();
+
+}
+
+	var animate = function () {
+
+					
+					requestAnimationFrame( animate );
+					//geo.rotation.y+=0.01;
+					//cube.rotation.x += 0.01;
+					//cube.rotation.y += 0.01;
+					var time= Date.now()*0.0005;
+					light.position.x=Math.sin(time*0.9)*30;
+					light.position.y=Math.cos(time*0.5)*40;
+					light.position.x=Math.cos(time*0.3)*30;
+
+					pointLight.position.x=Math.cos(time*0.8)*30;
+					pointLight.position.y=Math.sin(time*0.20)*40;
+					pointLight.position.x=Math.sin(time*0.70)*30;
+					
+            		//geo.scale.x += controls.scale;
+            		//geo.scale.y += controls.scale;
+            		//geo.scale.z += controls.scale;
+            		geo.rotation.x += parameter.rx1;
+				    geo.rotation.y += parameter.ry1;
+					geo.rotation.z += parameter.rz1;
+					/*light3.position.x=Math.sin(time*0.7)*30;
+					light3.position.y=Math.cos(time*0.3)*40;
+					light3.position.x=Math.cos(time*0.5)*30;*/
+
+					if ( shaderActive == "none" )
+							renderer.render( scene, camera );
+					else
+							composer.render();
+					
+				};
+
+				animate();
+
+			</script>
+		</body>
+	</html>
