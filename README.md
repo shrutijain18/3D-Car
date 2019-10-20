@@ -2,20 +2,20 @@
 
 * **Implementation** \
 The project implements the following features: \
-✓ Application of 3D transformation
-✓ View of the object from multiple views. (Effect = Anaglyph Effect)
-✓ Transform camera/viewer/light sources(s).
-✓ Perspective Vanishing Points.
-✓ Mapping
-✓ Window Resize
-✓ Stats Provider
-✓ Keyboard Controls
-✓ Mouse Controls
-✓ Shaders (Vignette)
-✓ Reset
-✓ Design your Own Car
+✓ Application of 3D transformation \
+✓ View of the object from multiple views. (Effect = Anaglyph Effect) \
+✓ Transform camera/viewer/light sources(s) \
+✓ Perspective Vanishing Points \
+✓ Mapping \
+✓ Window Resize \
+✓ Stats Provider \
+✓ Keyboard Controls \
+✓ Mouse Controls \
+✓ Shaders (Vignette) \
+✓ Reset \
+✓ Design your Own Car 
 
-* **Implementation Description** \
+* **Implementation Description** 
  1. 3D Transformation
 a. The object, car, can be rotated on either axis. The object has been
 implemented with a translation into the skybox .
