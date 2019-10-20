@@ -1,0 +1,372 @@
+	<html>
+		<head>
+			<title>My first three.js app</title>
+			<style>
+				body { margin: 0; }
+				canvas { width: 100%; height: 100% }
+			</style>
+		</head>
+		<body> 
+			<script src="three.js"></script>
+			<script src="OrbitControls.js"></script>
+		 	<script src="AnaglyphEffect.js"></script>
+			<script src="dat.gui.min.js"></script>*/
+			<script >
+				//window.onload = function() 
+    
+				(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='stats.js';document.head.appendChild(script);})();
+
+				
+
+				var scene = new THREE.Scene();
+				var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 ); //pc(field of view, aspect ratio, near clipping, far clipping);
+				//Reposition the camera;
+				camera.position.set(0,30,50);
+				//Point the camera at a specified coordinate
+				camera.lookAt(new THREE.Vector3(0,15,0));
+				var renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor(0xffffff);
+				renderer.shadowMap.enabled=true;
+				renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+				document.body.appendChild( renderer.domElement );
+
+				//resize the object with window
+				window.addEventListener('resize',function()
+				{
+					var width= window.innerWidth;
+					var height=window.innerHeight;
+					renderer.setSize(width,height);
+					camera.aspect=width/height;
+					camera.updateProjectionMatrix();
+				});
+				var effect=new THREE.AnaglyphEffect(renderer);
+				effect.setSize(window.innerWidth,window.innerHeight);
+				controls=new THREE.OrbitControls(camera,renderer.domElement);
+
+
+	// create shape
+
+				
+				//create a material/texture
+				var material=new THREE.MeshBasicMaterial({
+						color: 0xFF0040,
+						transparent:true,
+						opacity:1,
+						wireframe:true,
+						wireframeLinewidth:'round',
+						wireframeLinecap: 'round'
+
+				});
+
+
+				camera.position.z = 2;
+	//using 4 walls as a way to skybox
+	//Floor
+	/*var floorGeometry=new THREE.CubeGeometry(10,1,10);
+	var texture1 = new THREE.TextureLoader().load( "Img/met_dn.png" );
+	var floorMaterial=new THREE.MeshLambertMaterial( { map: texture1, side:THREE.DoubleSide});
+	var floorCube=new THREE.Mesh(floorGeometry,floorMaterial);
+	floorCube.position.y=-5;
+	scene.add(floorCube);
+
+	//Ceiling
+	var ceilingGeometry=new THREE.CubeGeometry(10,1,10);
+	var ceilingMaterial=new THREE.MeshLambertMaterial( { map: new THREE.TextureLoader().load('Img/met_up.png'), side:THREE.DoubleSide});
+	var ceilingCube=new THREE.Mesh(ceilingGeometry,ceilingMaterial);
+	ceilingCube.position.y=5;
+	scene.add(ceilingCube);
+
+	//Left Wall
+	var leftWallGeometry=new THREE.CubeGeometry(1,10,10);
+	var leftWallMaterial=new THREE.MeshLambertMaterial( { map: new THREE.TextureLoader().load('Img/met_lf.png'), side:THREE.DoubleSide});
+	var leftWallCube=new THREE.Mesh(leftWallGeometry,leftWallMaterial);
+	leftWallCube.position.x=-5;
+	scene.add(leftWallCube);
+
+	//Right Wall
+	var rightWallGeometry=new THREE.CubeGeometry(1,10,10);
+	var rightWallMaterial=new THREE.MeshLambertMaterial( { map: new THREE.TextureLoader().load('Img/met_rt.png'), side:THREE.DoubleSide});
+	var rightWallCube=new THREE.Mesh(rightWallGeometry,rightWallMaterial);
+	rightWallCube.position.x=5;
+	scene.add(rightWallCube);*/
+
+				var light=new THREE.AmbientLight(0xBDB76B,1);
+				scene.add(light);
+
+				var pointLight = new THREE.PointLight( 0xff0000, 2 );
+				pointLight.position.set( 25, 50, 25 );
+				pointLight.castShadow = true;
+				pointLight.shadow.mapSize.width = 512; //default
+				pointLight.shadow.mapSize.height = 1024;
+				pointLight.shadow.camera.near=0.5;
+				pointLight.shadow.camera.far=500;
+				scene.add( pointLight );
+				//Create a sphere that cast shadows (but does not receive them)
+	/*var sphereGeometry = new THREE.SphereBufferGeometry( 5, 32, 32 );
+	var sphereMaterial = new THREE.MeshStandardMaterial( { color: 0xff0000 } );
+	var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+	sphere.castShadow = true; //default is false
+	sphere.receiveShadow = false; //default
+	scene.add( sphere );*/
+
+	//Create a plane that receives shadows (but does not cast them)
+	/*var planeGeometry = new THREE.PlaneBufferGeometry( 20, 20, 32, 32 );
+	var planeMaterial = new THREE.MeshStandardMaterial( { color: 0x00ff00 } )
+	var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+	plane.receiveShadow = true;
+	scene.add( plane );*/
+
+	//Create a helper for the shadow camera (optional)
+	//var helper = new THREE.CameraHelper(camera );
+	//scene.add( helper );
+
+	//skybox...................................................................................................
+
+
+	/*var group=new THREE.Object3D();
+
+			//camera.position=3;
+			
+			//CUBE1 (RIGHT)
+
+			var leftbCube=new THREE.BoxGeometry(120,80,100);
+			var mesh1= new THREE.Mesh(leftbCube,material);
+			mesh1.position.set(0,10,-1000);
+			group.add(mesh1);
+			//CUBE2 (LEFT)
+			var righttbCube=new THREE.BoxGeometry(120,80,100);
+			var mesh2= new THREE.Mesh(righttbCube,material);
+			mesh2.position.set(100,10,-1000);
+			group.add(mesh2);
+			//CUBE3 (UP)
+			var cubeUp=new THREE.BoxGeometry(100,-60,70);
+			var mesh2= new THREE.Mesh(cubeUp,material);
+			mesh2.position.set(50,80,-1000);
+			group.add(mesh2);
+			//Back Right Tire
+			var backRight=new THREE.CircleGeometry(
+					38, //radius
+					32, //segments
+					0, //start angle
+					- Math.PI //half circle
+			);
+			var material2= new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load('Img/tire.jpg'), side:THREE.DoubleSide});
+			var mesh3= new THREE.Mesh(backRight,material2);
+			mesh3.position.set(150,-60,-1800);
+			group.add(mesh3);
+			//Back left  Tire
+			var backLeft=new THREE.CircleGeometry(
+					38, //radius
+					32, //segments
+					0, //start angle
+					- Math.PI //half circle
+			);
+			var mesh4= new THREE.Mesh(backLeft,material2);
+			mesh4.position.set(40,-60,-1800);
+			group.add(mesh4);
+			//Front Right Tire
+			var frontRight=new THREE.CircleGeometry(
+					30, //radius
+					32, //segments
+					0, //start angle
+					- 2* Math.PI //half circle
+			);
+			var mesh5= new THREE.Mesh(frontRight,material2);
+			mesh5.position.set(-05,-38,-900);
+			group.add(mesh5);
+			//Front Left Tire
+			var frontLeft=new THREE.CircleGeometry(
+					30, //radius
+					32, //segments
+					0, //start angle
+					- 2* Math.PI //half circle
+			);
+			var mesh6= new THREE.Mesh(frontLeft,material2);
+			mesh6.position.set(105,-38,-900);
+			group.add(mesh6);
+
+			//front mirror
+			var frontMirror=new THREE.Shape();
+			frontMirror.moveTo(0,10,80);
+			frontMirror.lineTo(57,70);
+			var extrudeSettings={
+				steps: 2, 
+				amount:60,
+				bevelEnabled: true,
+				bevelSegments: 4,
+				 bevelSize:2, 
+				 bevelThickness:6};
+				 //extrudePath: THREE	.CurvePath};
+			
+			var fM=new THREE.ExtrudeGeometry(frontMirror,extrudeSettings);
+			var mesh7=new THREE.Mesh(fM,material);
+			mesh7.position.set(-60,
+			40,-1000);
+			group.add(mesh7);
+
+			//Headlight
+			var headLight= new THREE.BoxGeometry(15,20,10);
+			var mesh8= new THREE.Mesh(headLight,material);
+			mesh8.position.set(-65,-10,-1000);
+			group.add(mesh8);
+
+			//TailLight
+			var tailLight= new THREE.BoxGeometry(15,20,10);
+			var mesh9= new THREE.Mesh(tailLight,material);
+			mesh9.position.set(165,-10,-1000);
+			group.add(mesh9);
+
+			//group.add(cube);
+			//group.translateX(10);
+			//group.translateY(-100);
+			//group.translateZ(-900);
+			scene.add(group);
+			//group.position.set(1,1,1);*/
+			var geometry1 = new THREE.BoxGeometry( 200,200,200);
+
+	var cubeMaterials=
+	[
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_ft.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_bk.png'), side:THREE.DoubleSide,shading:THREE.FlatShading}),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_up.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_dn.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_rt.png'), side:THREE.DoubleSide,shading:THREE.FlatShading }),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('Img/met_lf.png'), side:THREE.DoubleSide,shading:THREE.FlatShading })
+	];
+
+				var material = new THREE.MeshFaceMaterial( cubeMaterials );
+				var cube = new THREE.Mesh( geometry1, cubeMaterials );
+				//geometry1.castShadow=true;
+				//geometry1.receiveShadow=true;
+				scene.add( cube );
+						//camera.position=3;
+		var geo=new THREE.Object3D();	
+		//upcube
+		var sphereGeometry = new THREE.BoxGeometry(4, 3, 4 );
+	  //var v1= document.getElementById("clr").value;
+
+	var sphereMaterial = new THREE.MeshPhongMaterial({color:'red'} );
+	var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+	sphere.castShadow = true; //default is false
+	sphere.receiveShadow = false; //default
+	sphere.position.set(0,1,0);
+	//sphereGeometry.translateY(2);
+	geo.add( sphere );
+	var sphereGeometry1 = new THREE.BoxGeometry( 10, 2, 5 );
+	var sphereMaterial1 = new THREE.MeshPhongMaterial( { color: 0x00FFFF } );
+	var sphere1 = new THREE.Mesh( sphereGeometry1, sphereMaterial1 );
+	sphere1.castShadow = true; //default is false
+	sphere1.receiveShadow = false; //default
+	geo.add( sphere1 );
+	//back right wheel
+	var geometry1 = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var material= new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load('Img/tire.jpg'), side:THREE.DoubleSide});
+	var sphere2 = new THREE.Mesh( geometry1, material );
+	sphere2.position.set(2,-1,-2.5);
+	geo.add( sphere2 );
+	//back left wheel
+	var geometry2 = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var sphere3 = new THREE.Mesh( geometry2, material );
+	sphere3.position.set(-2,-1,-2.5);
+	geo.add( sphere3 );
+	//front left
+	var geometry3 = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var sphere4 = new THREE.Mesh( geometry3, material );
+	sphere4.position.set(-2,-1,2.6);
+	geo.add( sphere4 );
+	//front right
+	var geometry4 = new THREE.CircleBufferGeometry( 1.5, 40 );
+	var sphere5 = new THREE.Mesh( geometry4, material );
+	sphere5.position.set(2,-1,2.6);
+	geo.add( sphere5 );
+
+	scene.add(geo);
+	
+	var gui = new dat.GUI();
+
+	//CONTROL MENU
+	
+	var cameraGui = gui.addFolder("camera position");
+	cameraGui.add(camera.position, 'x');
+	cameraGui.add(camera.position, 'y');
+	cameraGui.add(camera.position, 'z');
+	cameraGui.open();
+
+	var cameraGui = gui.addFolder("camera projection");
+	cameraGui.add(camera, "fov");
+	cameraGui.open();
+
+	var lightGui = gui.addFolder("Ambient light position");
+	lightGui.add(light.position, 'x');
+	lightGui.add(light.position, 'y');
+	lightGui.add(light.position, 'z');
+	lightGui.open();
+
+	var light1Gui = gui.addFolder("Point light position");
+	light1Gui.add(pointLight.position, 'x');
+	light1Gui.add(pointLight.position, 'y');
+	light1Gui.add(pointLight.position, 'z');
+	light1Gui.open();
+	/*var geoGui = gui.addFolder("Car Rotation");
+	geoGui.add(geo.rotation, 'x');
+	geoGui.add(geo.rotation, 'y');
+	geoGui.add(geo.rotation, 'z');
+	geoGui.open();*/
+var data = document.getElementById('data');	
+
+var controls = new function() {
+this.rotationSpeed = 0.02;
+ // this.color = "#ff0000";
+ this.scale = 1;
+   //this.color1 = [ 0, 128, 255 ]; 
+};
+
+//  gui.addColor(geo.color, 'color');
+
+gui.add(controls, 'rotationSpeed',0,0.2);
+ gui.add(controls, 'scale', 0.01, 1);
+//Checking the status
+//var ro= document.getElementById("myText").value;
+	//requestAnimationFrame( animate );
+	// gui.add(text, 'speed', -5, 5);
+	geo.translateX(-40);
+	geo.translateY(-50);
+	geo.translateZ(-90);
+
+				var animate = function () {
+
+					
+					requestAnimationFrame( animate );
+					//geo.rotation.y+=0.01;
+					//cube.rotation.x += 0.01;
+					//cube.rotation.y += 0.01;
+					var time= Date.now()*0.0005;
+					light.position.x=Math.sin(time*0.9)*30;
+					light.position.y=Math.cos(time*0.5)*40;
+					light.position.x=Math.cos(time*0.3)*30;
+
+					pointLight.position.x=Math.cos(time*0.8)*30;
+					pointLight.position.y=Math.sin(time*0.20)*40;
+					pointLight.position.x=Math.sin(time*0.70)*30;
+					//geo.rotation.x += controls.rotationSpeed;
+            		//geo.rotation.y += controls.rotationSpeed;
+            		//geo.rotation.z += controls.rotationSpeed;
+            		//geo.scale.x += controls.scale;
+            		//geo.scale.y += controls.scale;
+            		//geo.scale.z += controls.scale;
+            		
+					/*light3.position.x=Math.sin(time*0.7)*30;
+					light3.position.y=Math.cos(time*0.3)*40;
+					light3.position.x=Math.cos(time*0.5)*30;*/
+					//geo.rotation.x+=0.01;
+					//geo.rotation.y+=0.01;
+					//geo.rotation.z+=0.01;
+					renderer.render(scene, camera);
+				};
+
+				animate();
+
+			</script>
+		</body>
+	</html>
