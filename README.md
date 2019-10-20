@@ -1,7 +1,7 @@
 ## Project Description
 
 * **Implementation** \
-The project implements the following features:
+The project implements the following features: \
 ✓ Application of 3D transformation
 ✓ View of the object from multiple views. (Effect = Anaglyph Effect)
 ✓ Transform camera/viewer/light sources(s).
