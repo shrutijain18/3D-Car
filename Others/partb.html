@@ -1,0 +1,110 @@
+<html>
+<body>
+<p>The new minister of transportation came up with a new enforcement plan .It implements a tight point system in the following way:<br>
+(a) A perfect drivers record is worth 100 points ; drivers in this cateogory keep their original wheels.<br>
+(b) First offenders get their score reduced by 20 points . Drivers whose score is between 80-99 get their wheels replaced by ellipse wheels.<br>
+(c)Any subsequent offense causes drivers to get their ellipse wheels replaced by polygon wheels in which number of sides of the polygon id determined by the score.</p><br>
+Drivers Score&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="driverScore" name="driverScore"> <br><br>Radius&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="radius" name="radius"><br><br>
+Color: <select id='strokeStyleSelect'>
+<option >Select a color</option>
+<option value='red'>red</option>
+<option value='green'>green</option>
+<option value='blue'>blue</option>
+</select> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Line Width<input id="width" name="width">  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id='draw' type='button' value='Draw Wheel!' onclick ='drawWheel()'/>
+<canvas id="canvas" width="800 " height="600" style="border:4px solid ;"></canvas>
+
+<script>
+var canvas = document.getElementById("canvas"),
+    ctx = canvas.getContext("2d"),
+    strokeStyleSelect = document.getElementById('strokeStyleSelect'),
+    edge = document.getElementById("driverScore"),
+    deg = Math.PI / 180,
+    radius=document.getElementById("radius");
+
+function drawWheel() {  
+ ctx.strokeStyle = strokeStyleSelect.value;
+ ctx.lineWidth = document.getElementById("width");
+    if(edge.value == 100)
+    {
+        var x = 400, y = 300;
+        innerCircle(x,y);
+        ctx.save(); 
+        ctx.beginPath();
+        ctx.arc(x,y,radius.value,radius.value,0,Math.PI*2,false);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    if(edge.value >= 80 && edge.value <= 99)
+    {
+        var x = 400, y = 300, rX, rY, ratioX, ratioY;
+        rX = radius.value;
+        rY = (r.value)*(1-0.01*(100-edge.value));
+        ratioX = rX / rX;
+        ratioY = rY / rX;
+        ctx.save(); 
+        ctx.scale(ratioX,ratioY);
+        ctx.beginPath();
+        ctx.arc(x/ratioX,y/ratioY,rX,rY,0,Math.PI*2,false);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.restore();
+        innerCircle(x,y);
+    }
+    if(edge.value <= 79 && edge.value >= 4)
+    {
+        var x = 400, y = 300;
+        var vertices = getPolygonVertices(edge.value, radius.value); 
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(canvas.width / 2, canvas.height / 2);  
+        ctx.moveTo(vertices[0][0], vertices[0][1]);  
+        for (var i = 1; i < vertices.length; i++) {  
+            ctx.lineTo(vertices[i][0], vertices[i][1]);  
+        }  
+        ctx.closePath();
+        ctx.stroke();  
+        ctx.restore();
+        innerCircle(x,y);
+    }  
+}
+
+function getPolygonVertices (edges, rad) {  
+    var ca = 0, aiv = 360 / edges, list = new Array();  
+    for (var k = 0; k < edges; k++) {  
+        var x = Math.cos(ca * deg) * rad,  
+            y = Math.sin(ca * deg) * rad; 
+        list.push([x, y]);  
+        ca += aiv;  
+    } 
+    return list;  
+}
+
+function innerCircle(x,y)
+{
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x,y,50,50,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x,y,90,90,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x,y-70,10,10,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x-70*Math.cos(52.5*deg),y+70*Math.sin(52.5*deg),10,10,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x+70*Math.cos(52.5*deg),y+70*Math.sin(52.5*deg),10,10,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x+70*Math.cos(15*deg),y-70*Math.sin(15*deg),10,10,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x-70*Math.cos(15*deg),y-70*Math.sin(15*deg),10,10,0,Math.PI*2,false);
+    ctx.stroke();
+    ctx.closePath();
+}
+</script>
+</body>
+</html>	
